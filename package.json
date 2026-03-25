@@ -55,7 +55,7 @@
       "compiled/patchWorker.js"
     ],
     "assets": [
-      "compiled/*.js",
+      "compiled/**/*",
       "src/three-onlymath.min.js"
     ]
   },
