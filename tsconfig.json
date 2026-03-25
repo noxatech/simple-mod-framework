@@ -2,7 +2,7 @@
     "compilerOptions": {
         "outDir": "./compiled",
         "rootDir": "./src",
-        "allowJs": true,
+        "allowJs": false, 
         "target": "ES2019",
         "module": "CommonJS",
         "esModuleInterop": true,
@@ -15,5 +15,5 @@
         "checkJs": false
     },
     "include": ["./src/**/*.ts"],
-    "exclude": ["node_modules", "**/three-onlymath.min.js"]
+    "exclude": ["node_modules"]
 }
