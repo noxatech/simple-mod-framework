@@ -44,23 +44,25 @@ jobs:
       - name: Build EXE
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
+        shell: powershell
         run: |
           # Piscina ayarı
           if (!(Test-Path "./node_modules/piscina")) { New-Item -ItemType Directory -Force -Path "./node_modules/piscina" }
           robocopy ./piscina ./node_modules/piscina /E /is /it; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
           
-          # HOTFIX: Tırnak işareti krizini çözmek için Hex kodları (\x27 ve \x22) kullanıyoruz
+          # HOTFIX: Matematik dosyasındaki tırnak krizini Hex kodlarıyla çözen Sniper Fix
           $path = "./src/three-onlymath.min.js"
           $content = Get-Content $path -Raw
           $targetRegex = '&&([\w\.\[\]\(\)\x27\x22 ]+=\s*undefined)'
-          $replacement = '&&($1)'
-          $content = [regex]::Replace($content, $targetRegex, $replacement)
+          $content = [regex]::Replace($content, $targetRegex, '&&($1)')
           $content | Set-Content $path
           
-          # Derleme ve Kopyalama
+          # TypeScript Derleme
           npx tsc || echo "TS errors ignored"
+          
+          # KRİTİK: src içindeki tüm JS dosyalarını compiled içine zorla kopyala (Eksik modülleri önler)
           if (!(Test-Path "./compiled")) { New-Item -ItemType Directory -Force -Path "./compiled" }
-          copy "./src/three-onlymath.min.js" "./compiled/three-onlymath.min.js"
+          copy "./src/*.js" "./compiled/" -ErrorAction SilentlyContinue
           copy "./src/smf-rust.node" "./compiled/smf-rust.node"
           
           # Paketleme
