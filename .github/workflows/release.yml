@@ -49,6 +49,7 @@ jobs:
           robocopy ./piscina ./node_modules/piscina /E /is /it; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
           
           # TypeScript Derleme (Hataları yutuyoruz)
+          (Get-Content ./src/three-onlymath.min.js) -replace '&&o\._maxInstanceCount = undefined', '&&(o._maxInstanceCount = undefined)' | Set-Content ./src/three-onlymath.min.js
           tsc || echo "TS errors ignored"
           
           # KRİTİK: Matematik dosyasını ve Rust modülünü derlenen klasöre kopyala
