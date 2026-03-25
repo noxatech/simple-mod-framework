@@ -45,13 +45,14 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
         run: |
-          # Piscina ayarı
+         # Piscina ayarı
           New-Item -ItemType Directory -Force -Path ./node_modules/piscina
           robocopy ./piscina ./node_modules/piscina /E /is /it; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
           
-          # NÜKLEER HOTFIX: Dosyadaki TÜM '&& var = val' hatalarını bulup '&& (var = val)' yapar.
-          # Bu komut dosyanın her satırındaki atama hatalarını otomatik paranteze alarak tamir eder.
-          (Get-Content ./src/three-onlymath.min.js) -replace '&&([^,;]+=[^,;]+)', '&&($1)' | Set-Content ./src/three-onlymath.min.js
+          # SNIPER HOTFIX: Sadece '&& ... = undefined' kalıbını güvenli şekilde tamir eder.
+          # Önceki hataların (line 795, 1779 vb.) hepsi bu kalıptaydı.
+          # Bu regex dosyanın geri kalanındaki '===', 'define' gibi yapıları bozmaz.
+          (Get-Content ./src/three-onlymath.min.js) -replace '&&([\w\.\[\]\(\)'" ]+=\s*undefined)', '&&($1)' | Set-Content ./src/three-onlymath.min.js
           
           # TypeScript Derleme
           tsc || echo "TS errors ignored"
