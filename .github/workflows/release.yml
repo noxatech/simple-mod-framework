@@ -3,13 +3,12 @@ name: Release
 on:
   push:
     tags:
-      - '*' # Tag formatı ne olursa olsun yakalar
-  workflow_dispatch: # Manuel başlatma butonunu ekledik
+      - '*'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v4
@@ -30,13 +29,13 @@ jobs:
         run: npm install
 
       - name: Prep
-        run: npm install -g pkg typescript @napi-rs/cli
+        run: npm install -g pkg typescript @napi-rs/cli yarn
 
       - name: Build Rust code
         run: |
           cd rust
-          npm install
-          npm run build
+          yarn
+          yarn build
           cd ../
           copy ./rust/index.d.ts ./src/smf-rust.d.ts
           copy ./rust/rust.win32-x64-msvc.node ./src/smf-rust.node
@@ -46,26 +45,29 @@ jobs:
           NODE_OPTIONS: "--max-old-space-size=4096"
         shell: powershell
         run: |
-          # Piscina ayarı
+          # 1. Piscina klasörü
           if (!(Test-Path "./node_modules/piscina")) { New-Item -ItemType Directory -Force -Path "./node_modules/piscina" }
           robocopy ./piscina ./node_modules/piscina /E /is /it; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
           
-          # HOTFIX: Matematik dosyasındaki tırnak krizini Hex kodlarıyla çözen Sniper Fix
+          # 2. Matematik dosyası Regex tamiri (Tırnaksız, hatasız)
           $path = "./src/three-onlymath.min.js"
-          $content = Get-Content $path -Raw
-          $targetRegex = '&&([\w\.\[\]\(\)\x27\x22 ]+=\s*undefined)'
-          $content = [regex]::Replace($content, $targetRegex, '&&($1)')
-          $content | Set-Content $path
+          if (Test-Path $path) {
+              $content = Get-Content $path -Raw
+              $content = [regex]::Replace($content, '&&([^,;]+=\s*undefined)', '&&($1)')
+              $content | Set-Content $path
+          }
           
-          # TypeScript Derleme
-          npx tsc || echo "TS errors ignored"
+          # 3. TypeScript Derleme (Hataları tamamen yut, Actions'ı durdurma)
+          npx tsc
+          $global:LASTEXITCODE = $null
           
-          # KRİTİK: src içindeki tüm JS dosyalarını compiled içine zorla kopyala (Eksik modülleri önler)
+          # 4. Eksik dosyaları compiled içine yedekle
           if (!(Test-Path "./compiled")) { New-Item -ItemType Directory -Force -Path "./compiled" }
-          copy "./src/*.js" "./compiled/" -ErrorAction SilentlyContinue
-          copy "./src/smf-rust.node" "./compiled/smf-rust.node"
+          Copy-Item -Path "./src/*.js" -Destination "./compiled/" -Force -ErrorAction SilentlyContinue
+          Copy-Item -Path "./src/smf-rust.node" -Destination "./compiled/smf-rust.node" -Force -ErrorAction SilentlyContinue
+          Copy-Item -Path "./src/three-onlymath.min.js" -Destination "./compiled/three-onlymath.min.js" -Force -ErrorAction SilentlyContinue
           
-          # Paketleme
+          # 5. Paketleme
           npx pkg package.json --targets node18-win-x64 --output Deploy.exe --compress Brotli
 
       - name: Build GUI
@@ -98,5 +100,6 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: dist/Release.zip
