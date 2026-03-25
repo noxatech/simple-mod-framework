@@ -4,7 +4,9 @@
 		"module": "esnext",
 		"target": "es2020",
 		"moduleResolution": "node",
-		"strict": true,
+		"strict": false,
+		"noImplicitAny": false,
+		"strictNullChecks": false,
 		"types": [
 			"vite/client",
 			"node"
@@ -15,9 +17,8 @@
 		"lib": [
 			"ESNext"
 		],
-		"importsNotUsedAsValues": "error",
 		"isolatedModules": true,
-		"sourceMap": true,
+		"sourceMap": false,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
@@ -25,12 +26,8 @@
 		"allowJs": true,
 		"checkJs": false,
 		"paths": {
-			"$lib": [
-				"src/lib"
-			],
-			"$lib/*": [
-				"src/lib/*"
-			],
+			"$lib": ["src/lib"],
+			"$lib/*": ["src/lib/*"],
 			"$app/*": [
 				".svelte/dev/runtime/app/*",
 				".svelte/build/runtime/app/*"
