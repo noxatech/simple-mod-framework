@@ -50,9 +50,13 @@
   },
   "bin": "compiled/main.js",
   "pkg": {
-    "scripts": [
+   "scripts": [
       "node_modules/piscina/dist/src/worker.js",
       "compiled/patchWorker.js"
+    ],
+    "assets": [
+      "compiled/*.js",
+      "src/three-onlymath.min.js"
     ]
   },
   "author": "Atampy26",
