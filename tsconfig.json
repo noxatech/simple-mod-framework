@@ -18,7 +18,7 @@
     },
     "include": [
         "./src/**/*"
-    ]
+    ],
     "exclude": [
         "node_modules",
         "src/three-onlymath.min.js"
