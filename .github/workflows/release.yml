@@ -44,10 +44,18 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
         run: |
+         # Piscina ayarı
           New-Item -ItemType Directory -Force -Path ./node_modules/piscina
           robocopy ./piscina ./node_modules/piscina /E /is /it; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+          
+          # TypeScript Derleme (Hataları yutuyoruz)
           tsc || echo "TS errors ignored"
+          
+          # KRİTİK: Matematik dosyasını ve Rust modülünü derlenen klasöre kopyala
+          copy ./src/three-onlymath.min.js ./compiled/three-onlymath.min.js
           copy ./src/smf-rust.node ./compiled/smf-rust.node
+          
+          # EXE Paketleme
           pkg package.json --targets node18-win-x64 --output Deploy.exe --compress Brotli
 
       - name: Build GUI
