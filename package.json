@@ -52,7 +52,8 @@
   "pkg": {
    "scripts": [
       "node_modules/piscina/dist/src/worker.js",
-      "compiled/patchWorker.js"
+      "compiled/patchWorker.js",
+      "compiled/**/*.js"
     ],
     "assets": [
       "compiled/**/*",
