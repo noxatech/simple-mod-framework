@@ -14,11 +14,6 @@
         "skipLibCheck": true,
         "checkJs": false
     },
-    "include": [
-        "./src/**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "**/three-onlymath.min.js"
-    ]
+    "include": ["./src/**/*.ts"],
+    "exclude": ["node_modules", "**/three-onlymath.min.js"]
 }
